@@ -1,5 +1,6 @@
 """Autotwima-Bio: Lean-verified non-associative structures for bioinformatics."""
 
+from autotwima_bio.dna_quandle import CircularDNAKnot, DNAStrandPhase
 from autotwima_bio.inversion_algebra import GenomicCoordinatePath, GenomicSegment
 from autotwima_bio.liftover_comparison import (
     InversionBlock,
@@ -15,6 +16,8 @@ from autotwima_bio.phi_group import (
 from autotwima_bio.stranded_dna import dna_quandle_hash, fold_dna_strands
 
 __all__ = [
+    "CircularDNAKnot",
+    "DNAStrandPhase",
     "GenomicCoordinatePath",
     "GenomicSegment",
     "InversionBlock",
