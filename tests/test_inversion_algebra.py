@@ -75,3 +75,53 @@ def test_associativity_defect_mixed_strand_orientation() -> None:
 
     defect = path.associativity_defect(0, 1, 2)
     assert defect == 900
+
+
+def test_nested_inversion_exact_coordinate_recovery() -> None:
+    """Verify Theorem 4.3: exact recovery of a somatic mutation in nested inversions."""
+    # Outer inversion on ChrX: 50,000 bp (reverse strand)
+    seg_a = GenomicSegment(name="ChrX_Inv_Outer", length=50_000, is_reverse=True)
+    # Inner nested inversion: 12,000 bp (reverse strand)
+    seg_b = GenomicSegment(name="ChrX_Inv_Inner", length=12_000, is_reverse=True)
+
+    # Local mutation located at position 3,450 inside the inner segment
+    true_local_offset = 3450
+    path = GenomicCoordinatePath.from_list(
+        [
+            seg_a,
+            seg_b,
+            GenomicSegment(
+                name="Somatic_Mutation",
+                length=true_local_offset,
+                is_reverse=False,
+            ),
+        ]
+    )
+
+    # Global observed position through Phi-folding: ((A * B) * X)
+    global_observed = path.evaluate_phi().coord
+
+    # Algebraic backward recovery without boundary iteration
+    recovered_local = path.solve_relative_coordinate(seg_a, seg_b, global_observed)
+
+    assert recovered_local == true_local_offset
+
+
+def test_recovery_on_forward_and_reverse_mix() -> None:
+    """Verify Theorem 4.3 works across asymmetric strand mixes."""
+    seg_a = GenomicSegment(name="Forward_Exon", length=800, is_reverse=False)
+    seg_b = GenomicSegment(name="Inverted_Intron", length=2500, is_reverse=True)
+
+    local_snp_offset = 120
+    path = GenomicCoordinatePath.from_list(
+        [
+            seg_a,
+            seg_b,
+            GenomicSegment(name="SNP", length=local_snp_offset, is_reverse=False),
+        ]
+    )
+
+    global_coord = path.evaluate_phi().coord
+    recovered = path.solve_relative_coordinate(seg_a, seg_b, global_coord)
+
+    assert recovered == local_snp_offset

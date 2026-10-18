@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from autotwima_bio.phi_group import PhiInfElement
+from autotwima_bio.phi_group import PhiInfElement, composite_invert
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,6 +55,30 @@ class GenomicCoordinatePath:
         for seg in self.segments[1:]:
             acc = acc.mul(seg.to_phi())
         return acc
+
+    def solve_relative_coordinate(
+        self, seg_a: GenomicSegment, seg_b: GenomicSegment, target_coord: int
+    ) -> int:
+        """Finds the local coordinate x inside nested segments using Theorem 4.3.
+
+        Given (A * B) * X = Y in global coordinates, recovers local feature coordinate X:
+            X = Phi_a^(-1) ( b^(-1) * ( a^(-1) * Y ) )
+
+        Args:
+            seg_a: First structural segment (outer environment).
+            seg_b: Second structural segment (inner nested environment).
+            target_coord: Observed global coordinate Y.
+
+        Returns:
+            Recovered exact local coordinate x.
+
+        """
+        a = seg_a.to_phi()
+        b = seg_b.to_phi()
+        y = PhiInfElement(coord=target_coord, is_reverse=False)
+
+        x_elem = composite_invert(a, b, y)
+        return x_elem.coord
 
     def associativity_defect(self, a_idx: int, b_idx: int, c_idx: int) -> int:
         """Computes the associativity defect between three consecutive segments.
