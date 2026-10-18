@@ -1,6 +1,11 @@
 """Autotwima-Bio: Lean-verified non-associative structures for bioinformatics."""
 
-from autotwima_bio.dna_quandle import CircularDNAKnot, DNAStrandPhase
+from autotwima_bio.dna_quandle import (
+    CircularDNAKnot,
+    DNAStrandPhase,
+    TopoisomeraseII,
+    TopoisomerState,
+)
 from autotwima_bio.inversion_algebra import GenomicCoordinatePath, GenomicSegment
 from autotwima_bio.liftover_comparison import (
     InversionBlock,
@@ -23,6 +28,8 @@ __all__ = [
     "InversionBlock",
     "PhiInfElement",
     "PrecomputedPhiLiftover",
+    "TopoisomerState",
+    "TopoisomeraseII",
     "classical_iterative_liftover",
     "composite_invert",
     "dna_quandle_hash",
