@@ -31,3 +31,55 @@ class GenomicSegment:
     def to_phi(self) -> PhiInfElement:
         """Converts genomic segment to M_inf element (length in Z, strand in Bool)."""
         return PhiInfElement(coord=self.length, is_reverse=self.is_reverse)
+
+
+@dataclass(frozen=True, slots=True)
+class GenomicCoordinatePath:
+    """An ordered path of genomic segments representing chromosomal structure.
+
+    Evaluates coordinate transitions through non-associative Phi-algebra.
+    """
+
+    segments: tuple[GenomicSegment, ...]
+
+    @classmethod
+    def from_list(cls, segments: list[GenomicSegment]) -> "GenomicCoordinatePath":
+        """Constructs a path from an ordered list of genomic segments."""
+        return cls(tuple(segments))
+
+    def evaluate_phi(self) -> PhiInfElement:
+        """Evaluates cumulative coordinates using left-to-right Phi-multiplication."""
+        if not self.segments:
+            return PhiInfElement.identity()
+        acc = self.segments[0].to_phi()
+        for seg in self.segments[1:]:
+            acc = acc.mul(seg.to_phi())
+        return acc
+
+    def associativity_defect(self, a_idx: int, b_idx: int, c_idx: int) -> int:
+        """Computes the associativity defect between three consecutive segments.
+
+        Verifies Theorem 5.4 from the paper:
+            Defect(a, b, c) = ((a * b) * c)_x - (a * (b * c))_x = eps2 * (1 - eps1) * x3.
+        """
+        a = self.segments[a_idx].to_phi()
+        b = self.segments[b_idx].to_phi()
+        c = self.segments[c_idx].to_phi()
+
+        left_bracket = a.mul(b).mul(c).coord
+        right_bracket = a.mul(b.mul(c)).coord
+        defect_measured = left_bracket - right_bracket
+
+        eps1 = a.sgn
+        eps2 = b.sgn
+        x3 = c.coord
+        defect_theoretical = eps2 * (1 - eps1) * x3
+
+        if defect_measured != defect_theoretical:
+            msg = (
+                f"Associativity defect mismatch! Measured {defect_measured}, "
+                f"expected theoretical {defect_theoretical}"
+            )
+            raise AssertionError(msg)
+
+        return defect_measured

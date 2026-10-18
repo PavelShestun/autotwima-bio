@@ -1,6 +1,6 @@
 """Autotwima-Bio: Lean-verified non-associative structures for bioinformatics."""
 
-from autotwima_bio.inversion_algebra import GenomicSegment
+from autotwima_bio.inversion_algebra import GenomicCoordinatePath, GenomicSegment
 from autotwima_bio.phi_group import (
     PhiInfElement,
     composite_invert,
@@ -9,6 +9,7 @@ from autotwima_bio.phi_group import (
 from autotwima_bio.stranded_dna import dna_quandle_hash, fold_dna_strands
 
 __all__ = [
+    "GenomicCoordinatePath",
     "GenomicSegment",
     "PhiInfElement",
     "composite_invert",
