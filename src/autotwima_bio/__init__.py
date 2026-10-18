@@ -3,6 +3,7 @@
 from autotwima_bio.inversion_algebra import GenomicCoordinatePath, GenomicSegment
 from autotwima_bio.liftover_comparison import (
     InversionBlock,
+    PrecomputedPhiLiftover,
     classical_iterative_liftover,
     phi_algebraic_liftover,
 )
@@ -18,6 +19,7 @@ __all__ = [
     "GenomicSegment",
     "InversionBlock",
     "PhiInfElement",
+    "PrecomputedPhiLiftover",
     "classical_iterative_liftover",
     "composite_invert",
     "dna_quandle_hash",

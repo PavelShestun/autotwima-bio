@@ -3,6 +3,7 @@
 from autotwima_bio.inversion_algebra import GenomicCoordinatePath, GenomicSegment
 from autotwima_bio.liftover_comparison import (
     InversionBlock,
+    PrecomputedPhiLiftover,
     classical_iterative_liftover,
     phi_algebraic_liftover,
 )
@@ -30,3 +31,22 @@ def test_equivalence_on_complex_nested_inversions() -> None:
             f"Mismatch at offset {test_offset}: "
             f"classical={classical_result}, phi={phi_result}"
         )
+
+
+def test_precomputed_phi_liftover_matches_classical() -> None:
+    """Verify O(1) PrecomputedPhiLiftover gives identical results."""
+    segments = [
+        GenomicSegment("Block_A", length=50_000, is_reverse=True),
+        GenomicSegment("Block_B", length=12_000, is_reverse=True),
+        GenomicSegment("Block_C", length=4_000, is_reverse=False),
+    ]
+    path = GenomicCoordinatePath.from_list(segments)
+    blocks = [
+        InversionBlock(chrom_start=s.length, length=s.length, is_inverted=s.is_reverse)
+        for s in segments
+    ]
+
+    resolver = PrecomputedPhiLiftover(path)
+
+    for offset in [0, 10, 500, 3999]:
+        assert resolver.translate(offset) == classical_iterative_liftover(blocks, offset)
